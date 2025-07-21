@@ -10,23 +10,50 @@ import { validationSchema } from './config/validation';
       isGlobal: true,
       load: [configuration],
       envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
-      validationSchema, // You had this in your file structure but not used
+      validationSchema,
     }),
     TypeOrmModule.forRootAsync({
-      imports: [ConfigModule], // This was missing - CRITICAL!
-      useFactory: (configService: ConfigService) => ({
-        type: 'postgres',
+      imports: [ConfigModule],
+      useFactory: (configService: ConfigService) => {
+        const isProduction = configService.get('NODE_ENV') === 'production';
+        const databaseUrl = configService.get<string>('database.url');
         
-        // Option 2: Or use DATABASE_URL if you prefer
-        url: configService.get<string>('database.url'),
+        // Proper SSL configuration
+        let sslConfig: any = false;
         
-        autoLoadEntities: true,
-        synchronize: configService.get<string>('NODE_ENV') === 'development',
-        logging: configService.get<string>('NODE_ENV') === 'development',
-        retryAttempts: 3,
-        retryDelay: 3000,
-      }),
-      inject: [ConfigService], // This was missing - CRITICAL!
+        if (configService.get<boolean>('database.ssl')) {
+          if (isProduction) {
+            // Production: enforce SSL
+            sslConfig = {
+              rejectUnauthorized: true,
+              // If you have a CA certificate, add it here:
+              // ca: fs.readFileSync('path/to/ca-certificate.crt').toString()
+            };
+          } else {
+            // Development: allow self-signed certificates
+            console.warn('⚠️  SSL certificate verification disabled for development');
+            sslConfig = {
+              rejectUnauthorized: false,
+            };
+          }
+        }
+
+        return {
+          type: 'postgres',
+          url: databaseUrl,
+          ssl: sslConfig,
+          autoLoadEntities: true,
+          synchronize: !isProduction, // Only sync in development
+          logging: !isProduction,
+          retryAttempts: 3,
+          retryDelay: 3000,
+          extra: {
+            // Additional SSL options if needed
+            ssl: sslConfig,
+          },
+        };
+      },
+      inject: [ConfigService],
     }),
   ],
 })
