@@ -3,12 +3,13 @@ import { ConfigModule, ConfigService } from '@nestjs/config';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation';
+import supabaseConfig from './config/supabase.config';
 
 @Module({
   imports: [
     ConfigModule.forRoot({
       isGlobal: true,
-      load: [configuration],
+      load: [configuration, supabaseConfig],
       envFilePath: [`.env.${process.env.NODE_ENV}`, '.env'],
       validationSchema,
     }),
@@ -25,7 +26,7 @@ import { validationSchema } from './config/validation';
         // SSL configuration for different environments
         let sslConfig: any = false;
         
-        if (configService.get<boolean>('database.ssl') || isSupabase) {
+        if (configService.get<string>('database.ssl') === 'true' || isSupabase) {
           if (isProduction || isSupabase) {
             // For Supabase, we need to allow their certificates
             sslConfig = {
