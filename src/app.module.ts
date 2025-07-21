@@ -15,42 +15,22 @@ import { validationSchema } from './config/validation';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
-        const isProduction = configService.get('NODE_ENV') === 'production';
         const databaseUrl = configService.get<string>('database.url');
         
-        // Proper SSL configuration
-        let sslConfig: any = false;
+        // Append SSL mode to the connection string
+        const urlWithSSL = databaseUrl!.includes('?') 
+          ? `${databaseUrl}&sslmode=require`
+          : `${databaseUrl}?sslmode=require`;
         
-        if (configService.get<boolean>('database.ssl')) {
-          if (isProduction) {
-            // Production: enforce SSL
-            sslConfig = {
-              rejectUnauthorized: true,
-              // If you have a CA certificate, add it here:
-              // ca: fs.readFileSync('path/to/ca-certificate.crt').toString()
-            };
-          } else {
-            // Development: allow self-signed certificates
-            console.warn('⚠️  SSL certificate verification disabled for development');
-            sslConfig = {
-              rejectUnauthorized: false,
-            };
-          }
-        }
-
         return {
           type: 'postgres',
-          url: databaseUrl,
-          ssl: sslConfig,
-          autoLoadEntities: true,
-          synchronize: !isProduction, // Only sync in development
-          logging: !isProduction,
-          retryAttempts: 3,
-          retryDelay: 3000,
-          extra: {
-            // Additional SSL options if needed
-            ssl: sslConfig,
+          url: urlWithSSL,
+          ssl: {
+            rejectUnauthorized: false,
           },
+          autoLoadEntities: true,
+          synchronize: configService.get('NODE_ENV') !== 'production',
+          logging: configService.get('NODE_ENV') !== 'production',
         };
       },
       inject: [ConfigService],
