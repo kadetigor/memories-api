@@ -3,7 +3,9 @@ export default () => ({
   nodeEnv: process.env.NODE_ENV || 'development',
   database: {
     url: process.env.DATABASE_URL,
-    ssl: process.env.DATABASE_SSL === 'true', // Convert string to boolean
+    ssl: process.env.DATABASE_SSL === 'true',
+    synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
+    logging: process.env.DATABASE_LOGGING === 'true',
   },
   redis: {
     url: process.env.REDIS_URL,
@@ -25,5 +27,10 @@ export default () => ({
   frontend: {
     url: process.env.FRONTEND_URL,
     allowedOrigins: process.env.ALLOWED_ORIGINS?.split(',') || [],
+  },
+  supabase: {
+    url: process.env.SUPABASE_URL,
+    anonKey: process.env.SUPABASE_ANON_KEY,
+    serviceKey: process.env.SUPABASE_SERVICE_KEY,
   },
 });

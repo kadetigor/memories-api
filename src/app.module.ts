@@ -15,22 +15,42 @@ import { validationSchema } from './config/validation';
     TypeOrmModule.forRootAsync({
       imports: [ConfigModule],
       useFactory: (configService: ConfigService) => {
+        const isProduction = configService.get('NODE_ENV') === 'production';
         const databaseUrl = configService.get<string>('database.url');
         
-        // Append SSL mode to the connection string
-        const urlWithSSL = databaseUrl!.includes('?') 
-          ? `${databaseUrl}&sslmode=require`
-          : `${databaseUrl}?sslmode=require`;
+        // Parse the database URL to check if it's Supabase
+        const isSupabase = databaseUrl?.includes('supabase.co') || 
+                          databaseUrl?.includes('pooler.supabase.com');
         
+        // SSL configuration for different environments
+        let sslConfig: any = false;
+        
+        if (configService.get<boolean>('database.ssl') || isSupabase) {
+          if (isProduction || isSupabase) {
+            // For Supabase, we need to allow their certificates
+            sslConfig = {
+              rejectUnauthorized: false, // Supabase uses valid certs but Node.js might not recognize them
+            };
+          } else {
+            // Local development with SSL
+            console.warn('⚠️  SSL certificate verification disabled for development');
+            sslConfig = {
+              rejectUnauthorized: false,
+            };
+          }
+        }
+
         return {
           type: 'postgres',
-          url: urlWithSSL,
-          ssl: {
-            rejectUnauthorized: false,
-          },
+          url: databaseUrl,
+          ssl: sslConfig,
           autoLoadEntities: true,
-          synchronize: configService.get('NODE_ENV') !== 'production',
-          logging: configService.get('NODE_ENV') !== 'production',
+          synchronize: !isProduction, // Simplified - remove the extra config check
+          logging: !isProduction,
+          retryAttempts: 10, // Increased for better stability
+          retryDelay: 3000,
+          connectTimeoutMS: 10000, // 10 seconds timeout
+          // DO NOT include 'extra' field - it causes conflicts with ssl config
         };
       },
       inject: [ConfigService],
