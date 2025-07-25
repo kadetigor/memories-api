@@ -8,20 +8,13 @@ export const validationSchema = Joi.object({
   
   // Database
   DATABASE_URL: Joi.string().required(),
-  DATABASE_SSL: Joi.string().valid('true', 'false').default('true'), // FIXED: Should be string not boolean
-  
-  // Redis
-  REDIS_URL: Joi.string().optional(), // Changed to optional for now
+  DATABASE_SSL: Joi.string().valid('true', 'false').default('true'),
+  DATABASE_SYNCHRONIZE: Joi.string().valid('true', 'false').default('false'),
+  DATABASE_LOGGING: Joi.string().valid('true', 'false').default('false'),
   
   // JWT
   JWT_SECRET: Joi.string().required().min(32),
   JWT_EXPIRES_IN: Joi.string().default('7d'),
-  
-  // AWS - Made optional for initial setup
-  AWS_REGION: Joi.string().optional(),
-  AWS_ACCESS_KEY_ID: Joi.string().optional(),
-  AWS_SECRET_ACCESS_KEY: Joi.string().optional(),
-  AWS_BUCKET_NAME: Joi.string().optional(),
   
   // Stripe - Made optional for initial setup
   STRIPE_SECRET_KEY: Joi.string().optional(),
@@ -38,7 +31,7 @@ export const validationSchema = Joi.object({
   SMTP_PASS: Joi.string().optional(),
   
   // Supabase
-  SUPABASE_URL: Joi.string().uri().optional(),
-  SUPABASE_ANON_KEY: Joi.string().optional(),
-  SUPABASE_SERVICE_KEY: Joi.string().optional(),
+  SUPABASE_URL: Joi.string().uri().required(),
+  SUPABASE_ANON_KEY: Joi.string().required(),
+  SUPABASE_SERVICE_KEY: Joi.string().required(),
 });

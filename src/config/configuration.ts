@@ -7,18 +7,9 @@ export default () => ({
     synchronize: process.env.DATABASE_SYNCHRONIZE === 'true',
     logging: process.env.DATABASE_LOGGING === 'true',
   },
-  redis: {
-    url: process.env.REDIS_URL,
-  },
   jwt: {
     secret: process.env.JWT_SECRET || 'default_jwt_secret',
     expiresIn: process.env.JWT_EXPIRES_IN || '7d',
-  },
-  aws: {
-    region: process.env.AWS_REGION,
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY,
-    bucketName: process.env.AWS_BUCKET_NAME,
   },
   stripe: {
     secretKey: process.env.STRIPE_SECRET_KEY,
