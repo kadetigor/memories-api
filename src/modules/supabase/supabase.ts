@@ -28,7 +28,7 @@ export class Supabase {
 
     this.clientInstance = createClient(
       this.configService.get('SUPABASE_URL') as string,
-      this.configService.get('SUPABASE_KEY') as string,
+      this.configService.get('SUPABASE_ANON_KEY') as string,
       {
         auth: {
           autoRefreshToken: true,

@@ -4,12 +4,12 @@ import { TypeOrmModule } from '@nestjs/typeorm';
 import configuration from './config/configuration';
 import { validationSchema } from './config/validation';
 import supabaseConfig from './config/supabase.config';
-import { SupabaseModule } from 'nestjs-supabase-js';
 import { PassportModule } from '@nestjs/passport';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { APP_GUARD } from '@nestjs/core';
 import { SupabaseGuard } from './modules/supabase/supabase.guard';
+import { SupabaseModule } from './modules/supabase/supabase.module';
 
 @Module({
   imports: [
