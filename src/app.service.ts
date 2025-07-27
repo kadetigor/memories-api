@@ -3,8 +3,7 @@ import { Supabase } from './modules/supabase/supabase';
 
 type Hello = {
   id: number;
-  name: string;
-  description: string;
+  email: string;
 };
 
 @Injectable()
@@ -14,7 +13,7 @@ export class AppService {
   async getHello(): Promise<Hello[]> {
     const { data, error } = await this.supabase
       .getClient()
-      .from('hello')
+      .from('auth')
       .select();
 
     if (error) {
